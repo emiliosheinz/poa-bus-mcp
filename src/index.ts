@@ -1,6 +1,8 @@
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
+import "dotenv/config";
 import express from "express";
+import { cacheService } from "./cache";
 import { getServer } from "./server";
 
 const app = express();
@@ -73,10 +75,33 @@ app.delete("/mcp", async (_, res) => {
   );
 });
 
-app.listen(3000, (error) => {
-  if (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
+async function startServer() {
+  try {
+    await cacheService.connect();
+    console.log("Connected to Redis cache");
+  } catch (error) {
+    console.warn("Failed to connect to Redis cache, will operate without caching:", error);
   }
-  console.log(`MCP Stateless Streamable HTTP Server listening on port ${3000}`);
+
+  app.listen(3000, (error) => {
+    if (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+    console.log(`MCP Stateless Streamable HTTP Server listening on port ${3000}`);
+  });
+}
+
+startServer();
+
+process.on("SIGINT", async () => {
+  console.log("Shutting down gracefully...");
+  await cacheService.disconnect();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  console.log("Shutting down gracefully...");
+  await cacheService.disconnect();
+  process.exit(0);
 });

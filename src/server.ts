@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { PoaTransporte } from "./poa-transporte";
+
 export const getServer = () => {
   const server = new McpServer({
     name: "poa-bus-server",
@@ -14,8 +15,7 @@ export const getServer = () => {
       description: "Lists every available bus stop in Porto Alegre",
     },
     async () => {
-      const response = await PoaTransporte.getStops();
-      const data = await response.text();
+      const data = await PoaTransporte.getStops();
       return { content: [{ type: "text", text: data }] };
     },
   );
@@ -27,8 +27,7 @@ export const getServer = () => {
       description: "Lists every available bus route in Porto Alegre",
     },
     async () => {
-      const response = await PoaTransporte.getRoutes();
-      const data = await response.text();
+      const data = await PoaTransporte.getRoutes();
       return { content: [{ type: "text", text: data }] };
     },
   );
@@ -44,8 +43,7 @@ export const getServer = () => {
       },
     },
     async ({ routeId }) => {
-      const response = await PoaTransporte.getRouteDetails(routeId);
-      const data = await response.text();
+      const data = await PoaTransporte.getRouteDetails(routeId);
       return { content: [{ type: "text", text: data }] };
     },
   );
