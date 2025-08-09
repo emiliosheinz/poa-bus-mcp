@@ -1,7 +1,7 @@
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
 import express from "express";
-import { server } from "./server";
+import { getServer } from "./server";
 
 const app = express();
 app.use(express.json());
@@ -20,6 +20,7 @@ app.post("/mcp", async (req, res) => {
         sessionIdGenerator: undefined,
         enableDnsRebindingProtection: true,
       });
+    const server = getServer();
     res.on("close", () => {
       console.log("Request closed");
       transport.close();
