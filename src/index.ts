@@ -1,62 +1,81 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { PoaTransporte } from "./poa-transporte";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import cors from "cors";
+import express from "express";
+import { server } from "./server";
 
-const server = new McpServer({
-	name: "poa-bus-server",
-	version: "0.0.1",
+const app = express();
+app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+    exposedHeaders: ["Mcp-Session-Id"],
+    allowedHeaders: ["Content-Type", "mcp-session-id"],
+  }),
+);
+
+app.post("/mcp", async (req, res) => {
+  try {
+    const transport: StreamableHTTPServerTransport =
+      new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableDnsRebindingProtection: true,
+      });
+    res.on("close", () => {
+      console.log("Request closed");
+      transport.close();
+      server.close();
+    });
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    console.error("Error handling MCP request:", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: "2.0",
+        error: {
+          code: -32603,
+          message: "Internal server error",
+        },
+        id: null,
+      });
+    }
+  }
 });
 
-server.registerTool(
-	"stops-fetcher",
-	{
-		title: "Stops Fetcher",
-		description: "Lists every available bus stop in Porto Alegre",
-	},
-	async () => {
-		const response = await PoaTransporte.getStops();
-		const data = await response.text();
-		return { content: [{ type: "text", text: data }] };
-	},
-);
+// SSE notifications not supported in stateless mode
+app.get("/mcp", async (_, res) => {
+  console.log("Received GET MCP request");
+  res.writeHead(405).end(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Method not allowed.",
+      },
+      id: null,
+    }),
+  );
+});
 
-server.registerTool(
-	"routes-fetcher",
-	{
-		title: "Routes Fetcher",
-		description: "Lists every available bus route in Porto Alegre",
-	},
-	async () => {
-		const response = await PoaTransporte.getRoutes();
-		const data = await response.text();
-		return { content: [{ type: "text", text: data }] };
-	},
-);
+// Session termination not needed in stateless mode
+app.delete("/mcp", async (_, res) => {
+  console.log("Received DELETE MCP request");
+  res.writeHead(405).end(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Method not allowed.",
+      },
+      id: null,
+    }),
+  );
+});
 
-server.registerTool(
-	"route-details-fetcher",
-	{
-		title: "Route Details Fetcher",
-		description: "Lists the details of a given bus route in Porto Alegre",
-		inputSchema: {
-			// @ts-ignore
-			routeId: z.string().describe("The ID of a specific bus route"),
-		},
-	},
-	async ({ routeId }) => {
-		const response = await PoaTransporte.getRouteDetails(routeId);
-		const data = await response.text();
-		return { content: [{ type: "text", text: data }] };
-	},
-);
-
-async function main() {
-	const transport = new StdioServerTransport();
-	await server.connect(transport);
-}
-
-main().catch((error) => {
-	console.error("Fatal error in main():", error);
-	process.exit(1);
+app.listen(3000, (error) => {
+  if (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+  console.log(`MCP Stateless Streamable HTTP Server listening on port ${3000}`);
 });

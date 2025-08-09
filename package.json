@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "tsc",
 		"start": "node ./dist/index.js",
-		"test": "npx -y @modelcontextprotocol/inspector node ./dist/index.js",
+		"test": "npx -y @modelcontextprotocol/inspector --config mcp.json --server poa-bus", 
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"check": "biome check .",
@@ -32,11 +32,15 @@
 	"packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.4",
+		"@types/cors": "^2.8.19",
 		"@types/node": "^24.2.0",
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.17.2",
+		"@types/express": "^5.0.3",
+		"cors": "^2.8.5",
+		"express": "^5.1.0",
 		"zod": "^4.0.15"
 	}
 }
