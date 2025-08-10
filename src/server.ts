@@ -8,6 +8,10 @@ import {
   transformStops,
 } from "./transformers";
 
+/**
+ * Creates and configures the MCP server with Porto Alegre bus transportation tools
+ * @returns {McpServer} Configured MCP server instance with registered tools
+ */
 export const getServer = () => {
   const server = new McpServer({
     name: "poa-bus-server",

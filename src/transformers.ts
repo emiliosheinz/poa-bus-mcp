@@ -9,6 +9,11 @@ import type {
   StopsFetcherResult,
 } from "./types";
 
+/**
+ * Transforms API stop response data to internal stop format
+ * @param {ApiStopsResponse} apiStops - Raw stop data from Porto Alegre Transport API
+ * @returns {StopsFetcherResult} Transformed stop data with normalized field names
+ */
 export function transformStops(apiStops: ApiStopsResponse): StopsFetcherResult {
   return apiStops.map((apiStop) => ({
     code: apiStop.codigo,
@@ -23,6 +28,11 @@ export function transformStops(apiStops: ApiStopsResponse): StopsFetcherResult {
   }));
 }
 
+/**
+ * Transforms API route response data to internal route format
+ * @param {ApiRoutesResponse} apiRoutes - Raw route data from Porto Alegre Transport API
+ * @returns {RoutesFetcherResult} Transformed route data with normalized field names
+ */
 export function transformRoutes(apiRoutes: ApiRoutesResponse): RoutesFetcherResult {
   return apiRoutes.map((apiRoute) => ({
     id: apiRoute.id,
@@ -31,6 +41,12 @@ export function transformRoutes(apiRoutes: ApiRoutesResponse): RoutesFetcherResu
   }));
 }
 
+/**
+ * Transforms API route details response to internal format
+ * Extracts and sorts coordinate data from numeric keys in the response
+ * @param {ApiRouteDetailsResponse} apiRouteDetails - Raw route details from API including coordinates
+ * @returns {RouteDetailsFetcherResult} Transformed route details with sorted coordinates array
+ */
 export function transformRouteDetails(
   apiRouteDetails: ApiRouteDetailsResponse
 ): RouteDetailsFetcherResult {

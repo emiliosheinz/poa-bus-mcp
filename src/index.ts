@@ -5,6 +5,7 @@ import express from "express";
 import { cache } from "./Cache";
 import { getServer } from "./server";
 
+/** Express application instance */
 const app = express();
 app.use(express.json());
 app.use(
@@ -15,6 +16,10 @@ app.use(
   }),
 );
 
+/**
+ * POST /mcp - Main MCP endpoint for handling stateless requests
+ * Creates a new server instance for each request
+ */
 app.post("/mcp", async (req, res) => {
   try {
     const transport: StreamableHTTPServerTransport =
@@ -45,7 +50,10 @@ app.post("/mcp", async (req, res) => {
   }
 });
 
-// SSE notifications not supported in stateless mode
+/**
+ * GET /mcp - SSE notifications endpoint (not supported in stateless mode)
+ * Returns 405 Method Not Allowed
+ */
 app.get("/mcp", async (_, res) => {
   console.log("Received GET MCP request");
   res.writeHead(405).end(
@@ -60,7 +68,10 @@ app.get("/mcp", async (_, res) => {
   );
 });
 
-// Session termination not needed in stateless mode
+/**
+ * DELETE /mcp - Session termination endpoint (not needed in stateless mode)
+ * Returns 405 Method Not Allowed
+ */
 app.delete("/mcp", async (_, res) => {
   console.log("Received DELETE MCP request");
   res.writeHead(405).end(
@@ -75,6 +86,10 @@ app.delete("/mcp", async (_, res) => {
   );
 });
 
+/**
+ * Starts the HTTP server and initializes Redis connection
+ * Server continues to operate even if Redis connection fails
+ */
 async function startServer() {
   try {
     await cache.connect();
@@ -94,12 +109,18 @@ async function startServer() {
 
 startServer();
 
+/**
+ * Graceful shutdown handler for SIGINT signal
+ */
 process.on("SIGINT", async () => {
   console.log("Shutting down gracefully...");
   await cache.disconnect();
   process.exit(0);
 });
 
+/**
+ * Graceful shutdown handler for SIGTERM signal
+ */
 process.on("SIGTERM", async () => {
   console.log("Shutting down gracefully...");
   await cache.disconnect();

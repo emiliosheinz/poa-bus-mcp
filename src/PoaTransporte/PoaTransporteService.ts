@@ -5,14 +5,24 @@ import type {
   ApiStopsResponse,
 } from "./types";
 
+/** Base URL for Porto Alegre Transport API */
 const baseURL = "http://www.poatransporte.com.br/php/facades/process.php";
 
+/** Cache TTL configuration in seconds (24 hours for all endpoints) */
 const CACHE_TTL = {
   STOPS: 86400,
   ROUTES: 86400,
   ROUTE_DETAILS: 86400,
 };
 
+/**
+ * Fetches data from URL with Redis caching support
+ * @template T - Type of the expected response data
+ * @param {string} url - API endpoint URL to fetch from
+ * @param {string} cacheKey - Redis cache key for storing/retrieving data
+ * @param {number} ttlSeconds - Time to live in seconds for cached data
+ * @returns {Promise<T>} Cached or freshly fetched data
+ */
 async function fetchWithCache<T>(
   url: string,
   cacheKey: string,
@@ -31,12 +41,24 @@ async function fetchWithCache<T>(
   return data;
 }
 
+/**
+ * Service for interacting with Porto Alegre Transport API
+ * Provides methods to fetch stops, routes, and route details with caching
+ */
 export const PoaTransporteService = {
+  /**
+   * Fetches all bus stops in Porto Alegre
+   * @returns {Promise<ApiStopsResponse>} Array of bus stops with their routes
+   */
   getStops: async (): Promise<ApiStopsResponse> => {
     const url = `${baseURL}?a=tp&p=`;
     return fetchWithCache<ApiStopsResponse>(url, "poa:stops", CACHE_TTL.STOPS);
   },
 
+  /**
+   * Fetches all bus routes in Porto Alegre
+   * @returns {Promise<ApiRoutesResponse>} Array of available bus routes
+   */
   getRoutes: async (): Promise<ApiRoutesResponse> => {
     const url = `${baseURL}?a=nc&p=%&t=o`;
     return fetchWithCache<ApiRoutesResponse>(
@@ -46,6 +68,11 @@ export const PoaTransporteService = {
     );
   },
 
+  /**
+   * Fetches detailed information for a specific bus route
+   * @param {string} routeId - Unique identifier for the bus route
+   * @returns {Promise<ApiRouteDetailsResponse>} Route details including coordinates
+   */
   getRouteDetails: async (
     routeId: string,
   ): Promise<ApiRouteDetailsResponse> => {

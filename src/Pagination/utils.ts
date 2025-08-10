@@ -1,16 +1,32 @@
 import { InvalidCursorError } from "./InvalidCursorError";
 
+/**
+ * Result structure for paginated data
+ * @template T - Type of items in the data array
+ */
 type PaginatedResult<T = unknown> = {
   data: T[];
   nextCursor?: string;
 };
 
+/** Default page size for pagination */
 const PAGE_SIZE = 100;
 
+/**
+ * Creates a Base64-encoded cursor from an offset value
+ * @param {number} offset - The offset position in the dataset
+ * @returns {string} Base64-encoded cursor string
+ */
 function createCursor(offset: number): string {
   return Buffer.from(JSON.stringify({ offset })).toString("base64");
 }
 
+/**
+ * Parses a Base64-encoded cursor to extract the offset
+ * @param {string | undefined} cursor - Base64-encoded cursor string
+ * @returns {number} Offset value extracted from cursor
+ * @throws {InvalidCursorError} If cursor format is invalid
+ */
 function parseCursor(cursor: string | undefined): number {
   if (!cursor) return 0;
   try {
