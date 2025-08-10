@@ -2,7 +2,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { InvalidCursorError, paginateData } from "./Pagination";
 import { PoaTransporteService } from "./PoaTransporte";
-import { transformRouteDetails, transformRoutes, transformStops } from "./transformers";
+import {
+  transformRouteDetails,
+  transformRoutes,
+  transformStops,
+} from "./transformers";
 
 export const getServer = () => {
   const server = new McpServer({
@@ -22,13 +26,34 @@ export const getServer = () => {
           .optional()
           .describe("Pagination cursor for fetching next page"),
       },
+      outputSchema: {
+        data: z.array(
+          z.object({
+            code: z.string(),
+            latitude: z.string(),
+            longitude: z.string(),
+            terminal: z.string(),
+            routes: z.array(
+              z.object({
+                id: z.string(),
+                code: z.string(),
+                name: z.string(),
+              }),
+            ),
+          }),
+        ),
+        nextCursor: z.string().optional(),
+      },
     },
     async ({ cursor }) => {
       try {
         const apiData = await PoaTransporteService.getStops();
         const transformedData = transformStops(apiData);
-        const paginated = paginateData(transformedData, cursor);
-        return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
+        const pagination = paginateData(transformedData, cursor);
+        return {
+          content: [{ type: "text", text: JSON.stringify(pagination, null, 2) }],
+          structuredContent: pagination,
+        };
       } catch (error) {
         if (error instanceof InvalidCursorError) {
           throw new Error(`Invalid params: ${error.message}`);
@@ -50,13 +75,26 @@ export const getServer = () => {
           .optional()
           .describe("Pagination cursor for fetching next page"),
       },
+      outputSchema: {
+        data: z.array(
+          z.object({
+            id: z.string(),
+            code: z.string(),
+            name: z.string(),
+          }),
+        ),
+        nextCursor: z.string().optional(),
+      },
     },
     async ({ cursor }) => {
       try {
         const apiData = await PoaTransporteService.getRoutes();
         const transformedData = transformRoutes(apiData);
-        const paginated = paginateData(transformedData, cursor);
-        return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
+        const pagination = paginateData(transformedData, cursor);
+        return {
+          content: [{ type: "text", text: JSON.stringify(pagination, null, 2) }],
+          structuredContent: pagination,
+        };
       } catch (error) {
         if (error instanceof InvalidCursorError) {
           throw new Error(`Invalid params: ${error.message}`);
@@ -74,11 +112,25 @@ export const getServer = () => {
       inputSchema: {
         routeId: z.string().describe("The ID of a specific bus route"),
       },
+      outputSchema: {
+        id: z.string(),
+        code: z.string(),
+        name: z.string(),
+        coordinates: z.array(
+          z.object({
+            latitude: z.string(),
+            longitude: z.string(),
+          })
+        ),
+      },
     },
     async ({ routeId }) => {
       const apiData = await PoaTransporteService.getRouteDetails(routeId);
       const transformedData = transformRouteDetails(apiData);
-      return { content: [{ type: "text", text: JSON.stringify(transformedData) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(transformedData, null, 2) }],
+        structuredContent: transformedData,
+      };
     },
   );
 

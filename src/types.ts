@@ -17,7 +17,9 @@ type Stop = {
   routes: Route[];
 };
 
-type RouteDetails = Route & { [key: number]: Coordinate };
+type RouteDetails = Route & {
+  coordinates: Coordinate[];
+};
 
 export type StopsFetcherResult = Stop[];
 

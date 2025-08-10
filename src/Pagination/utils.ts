@@ -1,7 +1,7 @@
 import { InvalidCursorError } from "./InvalidCursorError";
 
 type PaginatedResult<T = unknown> = {
-  items: T[];
+  data: T[];
   nextCursor?: string;
 };
 
@@ -46,17 +46,17 @@ export function paginateData<T = unknown>(
 
   if (offset >= items.length) {
     return {
-      items: [],
+      data: [],
       nextCursor: undefined,
     };
   }
 
   const endIndex = Math.min(offset + pageSize, items.length);
-  const paginatedItems = items.slice(offset, endIndex);
+  const paginatedData = items.slice(offset, endIndex);
   const hasMore = endIndex < items.length;
 
   return {
-    items: paginatedItems,
+    data: paginatedData,
     nextCursor: hasMore ? createCursor(endIndex) : undefined,
   };
 }

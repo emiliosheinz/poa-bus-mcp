@@ -34,21 +34,23 @@ export function transformRoutes(apiRoutes: ApiRoutesResponse): RoutesFetcherResu
 export function transformRouteDetails(
   apiRouteDetails: ApiRouteDetailsResponse
 ): RouteDetailsFetcherResult {
-  const transformed: RouteDetailsFetcherResult = {
+  // Extract coordinates from numeric keys
+  const coordinates = Object.entries(apiRouteDetails)
+    .filter(([key]) => !isNaN(Number(key)))
+    .map(([key, value]) => ({
+      index: Number(key),
+      value: value as { lat: string; lng: string },
+    }))
+    .sort((a, b) => a.index - b.index)
+    .map(({ value }) => ({
+      latitude: value.lat,
+      longitude: value.lng,
+    }));
+
+  return {
     id: apiRouteDetails.idlinha,
     name: apiRouteDetails.nome,
     code: apiRouteDetails.codigo,
+    coordinates,
   };
-
-  Object.entries(apiRouteDetails).forEach(([key, value]) => {
-    const numKey = Number(key);
-    if (!Number.isNaN(numKey) && typeof value === "object" && "lat" in value && "lng" in value) {
-      transformed[numKey] = {
-        latitude: value.lat,
-        longitude: value.lng,
-      };
-    }
-  });
-
-  return transformed;
 }
