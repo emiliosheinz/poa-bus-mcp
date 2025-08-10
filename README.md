@@ -1,4 +1,4 @@
-# Porto Alegre Bus MCP Server
+# 🚌 Porto Alegre Bus MCP Server
 
 MCP server for Porto Alegre's public transportation data. Access bus stops, routes, and real-time information through Claude Desktop or any MCP-compatible client.
 
