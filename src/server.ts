@@ -38,7 +38,6 @@ export const getServer = () => {
       title: "Route Details Fetcher",
       description: "Lists the details of a given bus route in Porto Alegre",
       inputSchema: {
-        // @ts-ignore
         routeId: z.string().describe("The ID of a specific bus route"),
       },
     },
