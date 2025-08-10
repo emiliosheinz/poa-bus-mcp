@@ -87,7 +87,3 @@ These projects provided valuable insights into Porto Alegre's public transportat
 ## License
 
 MIT - See [LICENSE](LICENSE)
-
-## Author
-
-[@emiliosheinz](https://github.com/emiliosheinz)
