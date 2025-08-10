@@ -7,6 +7,7 @@ MCP server for Porto Alegre's public transportation data. Access bus stops, rout
 - 🚌 List all bus stops in Porto Alegre
 - 🛣️ Browse available bus routes
 - 📍 Get detailed route information (stops, schedule, path)
+- 📄 Pagination support for large datasets
 - ⚡ Redis caching for improved performance
 - 🌐 HTTP streaming server with stateless architecture
 
@@ -27,10 +28,12 @@ The command below will start the MCP server along with a Redis instance:
 docker-compose up -d
 ```
 
-### Other useful commands
+### Development Commands
 
 ```bash
 pnpm test        # Run MCP Inspector
+pnpm lint        # Run linter
+pnpm format      # Format code
 pnpm check       # Lint & format check
 pnpm check:fix   # Auto-fix issues
 ```
@@ -54,9 +57,9 @@ Add to your `claude_desktop_config.json`:
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
-| `stops-fetcher` | List all bus stops | None |
-| `routes-fetcher` | List all bus routes | None |
-| `route-details-fetcher` | Get route details | `routeId` (string) |
+| `stops-fetcher` | List all bus stops with pagination | `cursor` (string, optional) |
+| `routes-fetcher` | List all bus routes with pagination | `cursor` (string, optional) |
+| `route-details-fetcher` | Get route details | `routeId` (string, required) |
 
 ### Architecture
 
@@ -71,6 +74,15 @@ Add to your `claude_desktop_config.json`:
 2. Create your feature branch
 3. Run `pnpm check` before committing
 4. Open a Pull Request
+
+## Acknowledgments
+
+This project was inspired by and built upon the work of:
+
+- [POABus](https://github.com/rafaeelaudibert/POABus) by [@rafaeelaudibert](https://github.com/rafaeelaudibert) - A comprehensive Porto Alegre bus system API
+- [poatransporte](https://github.com/ClaudiaStrm/poatransporte) by [@ClaudiaStrm](https://github.com/ClaudiaStrm) - Porto Alegre public transportation data tools
+
+These projects provided valuable insights into Porto Alegre's public transportation data structure and API patterns.
 
 ## License
 

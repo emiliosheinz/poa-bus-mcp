@@ -26,10 +26,10 @@ type ApiRouteDetails = {
   idlinha: string;
   nome: string;
   codigo: string;
-} 
+};
 
 export type ApiStopsResponse = ApiStop[];
 
 export type ApiRoutesResponse = ApiRoute[];
 
-export type ApiRouteDetailsResponse = ApiRouteDetails
+export type ApiRouteDetailsResponse = ApiRouteDetails;
