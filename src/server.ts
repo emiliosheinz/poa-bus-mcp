@@ -12,7 +12,7 @@ import {
  * Creates and configures the MCP server with Porto Alegre bus transportation tools
  * @returns {McpServer} Configured MCP server instance with registered tools
  */
-export const getServer = () => {
+export const getServer = (): McpServer => {
   const server = new McpServer({
     name: "poa-bus-server",
     version: "0.0.1",
