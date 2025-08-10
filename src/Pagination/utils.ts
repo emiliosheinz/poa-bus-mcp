@@ -1,22 +1,17 @@
-export type PaginatedResult<T = unknown> = {
+import { InvalidCursorError } from "./InvalidCursorError";
+
+type PaginatedResult<T = unknown> = {
   items: T[];
   nextCursor?: string;
 };
 
-export const PAGE_SIZE = 100;
+const PAGE_SIZE = 100;
 
-export function createCursor(offset: number): string {
+function createCursor(offset: number): string {
   return Buffer.from(JSON.stringify({ offset })).toString("base64");
 }
 
-export class InvalidCursorError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'InvalidCursorError';
-  }
-}
-
-export function parseCursor(cursor: string | undefined): number {
+function parseCursor(cursor: string | undefined): number {
   if (!cursor) return 0;
   try {
     const decoded = Buffer.from(cursor, "base64").toString("utf-8");

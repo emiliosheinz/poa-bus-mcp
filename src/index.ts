@@ -2,7 +2,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import { cache } from "./cache";
+import { cache } from "./Cache";
 import { getServer } from "./server";
 
 const app = express();

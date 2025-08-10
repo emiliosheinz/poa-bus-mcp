@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-export class Cache {
+export class CacheService {
   private client: ReturnType<typeof createClient>;
   private isConnected = false;
 
@@ -88,5 +88,3 @@ export class Cache {
     }
   }
 }
-
-export const cache = new Cache();

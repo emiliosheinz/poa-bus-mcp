@@ -1,7 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { InvalidCursorError, paginateData } from "./pagination";
-import { PoaTransporte } from "./poa-transporte";
+import { InvalidCursorError, paginateData } from "./Pagination";
+import { PoaTransporteService } from "./PoaTransporte";
+import { transformRouteDetails, transformRoutes, transformStops } from "./transformers";
 
 export const getServer = () => {
   const server = new McpServer({
@@ -24,12 +25,12 @@ export const getServer = () => {
     },
     async ({ cursor }) => {
       try {
-        const data = await PoaTransporte.getStops();
-        const paginated = paginateData(data, cursor);
+        const apiData = await PoaTransporteService.getStops();
+        const transformedData = transformStops(apiData);
+        const paginated = paginateData(transformedData, cursor);
         return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
       } catch (error) {
         if (error instanceof InvalidCursorError) {
-          // MCP spec: Invalid cursors should result in error code -32602 (Invalid params)
           throw new Error(`Invalid params: ${error.message}`);
         }
         throw error;
@@ -52,12 +53,12 @@ export const getServer = () => {
     },
     async ({ cursor }) => {
       try {
-        const data = await PoaTransporte.getRoutes();
-        const paginated = paginateData(data, cursor);
+        const apiData = await PoaTransporteService.getRoutes();
+        const transformedData = transformRoutes(apiData);
+        const paginated = paginateData(transformedData, cursor);
         return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
       } catch (error) {
         if (error instanceof InvalidCursorError) {
-          // MCP spec: Invalid cursors should result in error code -32602 (Invalid params)
           throw new Error(`Invalid params: ${error.message}`);
         }
         throw error;
@@ -75,8 +76,9 @@ export const getServer = () => {
       },
     },
     async ({ routeId }) => {
-      const data = await PoaTransporte.getRouteDetails(routeId);
-      return { content: [{ type: "text", text: JSON.stringify(data) }] };
+      const apiData = await PoaTransporteService.getRouteDetails(routeId);
+      const transformedData = transformRouteDetails(apiData);
+      return { content: [{ type: "text", text: JSON.stringify(transformedData) }] };
     },
   );
 
