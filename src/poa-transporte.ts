@@ -1,4 +1,4 @@
-import { cacheService } from "./cache";
+import { cache } from "./cache";
 
 const baseURL = "http://www.poatransporte.com.br/php/facades/process.php";
 
@@ -8,39 +8,53 @@ const CACHE_TTL = {
   ROUTE_DETAILS: 86400,
 };
 
-async function fetchWithCache(
+async function fetchWithCache<T>(
   url: string,
   cacheKey: string,
   ttlSeconds: number,
-): Promise<string> {
-  const cached = await cacheService.get(cacheKey);
+): Promise<T> {
+  const cached = await cache.get(cacheKey);
   if (cached) {
     console.log(`Cache hit for key: ${cacheKey}`);
-    return cached;
+    try {
+      return JSON.parse(cached) as T;
+    } catch {
+      // If cache has invalid JSON, fetch fresh data
+      console.warn(`Invalid cached JSON for key: ${cacheKey}, fetching fresh data`);
+    }
   }
 
   console.log(`Cache miss for key: ${cacheKey}, fetching from API`);
   const response = await fetch(url);
-  const data = await response.text();
+  const text = await response.text();
+  
+  let data: T;
+  try {
+    data = JSON.parse(text) as T;
+  } catch {
+    // If API returns non-JSON, treat as empty array
+    console.warn(`API returned non-JSON data for ${url}`);
+    data = [] as T;
+  }
 
-  await cacheService.set(cacheKey, data, ttlSeconds);
+  await cache.set(cacheKey, JSON.stringify(data), ttlSeconds);
 
   return data;
 }
 
 export const PoaTransporte = {
-  getStops: async (): Promise<string> => {
+  getStops: async (): Promise<unknown[]> => {
     const url = `${baseURL}?a=tp&p=`;
-    return fetchWithCache(url, "poa:stops", CACHE_TTL.STOPS);
+    return fetchWithCache<unknown[]>(url, "poa:stops", CACHE_TTL.STOPS);
   },
 
-  getRoutes: async (): Promise<string> => {
+  getRoutes: async (): Promise<unknown[]> => {
     const url = `${baseURL}?a=nc&p=%&t=o`;
-    return fetchWithCache(url, "poa:routes", CACHE_TTL.ROUTES);
+    return fetchWithCache<unknown[]>(url, "poa:routes", CACHE_TTL.ROUTES);
   },
 
-  getRouteDetails: async (routeId: string): Promise<string> => {
+  getRouteDetails: async (routeId: string): Promise<unknown> => {
     const url = `${baseURL}?a=il&p=${routeId}`;
-    return fetchWithCache(url, `poa:route:${routeId}`, CACHE_TTL.ROUTE_DETAILS);
+    return fetchWithCache<unknown>(url, `poa:route:${routeId}`, CACHE_TTL.ROUTE_DETAILS);
   },
 };

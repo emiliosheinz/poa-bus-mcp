@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { InvalidCursorError, paginateData } from "./pagination";
 import { PoaTransporte } from "./poa-transporte";
 
 export const getServer = () => {
@@ -12,11 +13,27 @@ export const getServer = () => {
     "stops-fetcher",
     {
       title: "Stops Fetcher",
-      description: "Lists every available bus stop in Porto Alegre",
+      description:
+        "Lists every available bus stop in Porto Alegre with pagination",
+      inputSchema: {
+        cursor: z
+          .string()
+          .optional()
+          .describe("Pagination cursor for fetching next page"),
+      },
     },
-    async () => {
-      const data = await PoaTransporte.getStops();
-      return { content: [{ type: "text", text: data }] };
+    async ({ cursor }) => {
+      try {
+        const data = await PoaTransporte.getStops();
+        const paginated = paginateData(data, cursor);
+        return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
+      } catch (error) {
+        if (error instanceof InvalidCursorError) {
+          // MCP spec: Invalid cursors should result in error code -32602 (Invalid params)
+          throw new Error(`Invalid params: ${error.message}`);
+        }
+        throw error;
+      }
     },
   );
 
@@ -24,11 +41,27 @@ export const getServer = () => {
     "routes-fetcher",
     {
       title: "Routes Fetcher",
-      description: "Lists every available bus route in Porto Alegre",
+      description:
+        "Lists every available bus route in Porto Alegre with pagination",
+      inputSchema: {
+        cursor: z
+          .string()
+          .optional()
+          .describe("Pagination cursor for fetching next page"),
+      },
     },
-    async () => {
-      const data = await PoaTransporte.getRoutes();
-      return { content: [{ type: "text", text: data }] };
+    async ({ cursor }) => {
+      try {
+        const data = await PoaTransporte.getRoutes();
+        const paginated = paginateData(data, cursor);
+        return { content: [{ type: "text", text: JSON.stringify(paginated) }] };
+      } catch (error) {
+        if (error instanceof InvalidCursorError) {
+          // MCP spec: Invalid cursors should result in error code -32602 (Invalid params)
+          throw new Error(`Invalid params: ${error.message}`);
+        }
+        throw error;
+      }
     },
   );
 
@@ -43,7 +76,7 @@ export const getServer = () => {
     },
     async ({ routeId }) => {
       const data = await PoaTransporte.getRouteDetails(routeId);
-      return { content: [{ type: "text", text: data }] };
+      return { content: [{ type: "text", text: JSON.stringify(data) }] };
     },
   );
 

@@ -2,7 +2,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import { cacheService } from "./cache";
+import { cache } from "./cache";
 import { getServer } from "./server";
 
 const app = express();
@@ -77,7 +77,7 @@ app.delete("/mcp", async (_, res) => {
 
 async function startServer() {
   try {
-    await cacheService.connect();
+    await cache.connect();
     console.log("Connected to Redis cache");
   } catch (error) {
     console.warn("Failed to connect to Redis cache, will operate without caching:", error);
@@ -96,12 +96,12 @@ startServer();
 
 process.on("SIGINT", async () => {
   console.log("Shutting down gracefully...");
-  await cacheService.disconnect();
+  await cache.disconnect();
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
   console.log("Shutting down gracefully...");
-  await cacheService.disconnect();
+  await cache.disconnect();
   process.exit(0);
 });
